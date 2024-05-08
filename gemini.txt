@@ -1,0 +1,41 @@
+import robocode.*;
+
+public class MeuRobo extends AdvancedRobot {
+
+    public void run() {
+        setAdjustRadarForRobotTurn(true);
+        setAdjustRadarForGunTurn(true);
+        
+        while (true) {
+            turnRadarRightRadians(Double.POSITIVE_INFINITY);
+        }
+    }
+
+    public void onScannedRobot(ScannedRobotEvent e) {
+        double absoluteBearing = getHeadingRadians() + e.getBearingRadians();
+        double radarTurn = absoluteBearing - getRadarHeadingRadians();
+        setTurnRadarRightRadians(Utils.normalRelativeAngle(radarTurn));
+
+        setTurnRightRadians(Utils.normalRelativeAngle(absoluteBearing - getHeadingRadians() + Math.PI / 2));
+
+        double enemyDistance = e.getDistance();
+        if (enemyDistance < 200) {
+            setFire(3);
+        } else if (enemyDistance < 400) {
+            setFire(2);
+        } else {
+            setFire(1);
+        }
+
+        setAhead(100);
+    }
+
+    public void onHitByBullet(HitByBulletEvent e) {
+        setTurnRight(90 - e.getBearing());
+    }
+
+    public void onHitWall(HitWallEvent e) {
+        setBack(100);
+        setTurnRight(90);
+    }
+}

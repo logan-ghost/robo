@@ -1,0 +1,69 @@
+import robocode.*;
+
+public class AtirarDesviarAndar extends AdvancedRobot {
+
+    // Velocidade de movimento
+    private static final double VELOCIDADE_MOVIMENTO = 5;
+
+    // Ângulo de desvio
+    private static final double ANGULO_DESVIO = 45;
+
+    // Distância mínima para atirar
+    private static final double DISTANCIA_MINIMA_TIRO = 400;
+
+    // Estado atual do robô (parado ou desviando)
+    private boolean desviando = false;
+
+    public void run() {
+        // Ajustar o corpo do robô para girar no lugar
+        setTurnGunRight(360);
+        waitFor(Complete);
+
+        // Loop principal do robô
+        while (true) {
+            // Verificar se há inimigos próximos
+            ScanResult[] resultadosScan = getScanResults();
+
+            if (resultadosScan.length > 0) {
+                // Obter o inimigo mais próximo
+                ScanResult inimigoMaisProximo = resultadosScan[0];
+
+                // Calcular a distância para o inimigo
+                double distanciaInimigo = inimigoMaisProximo.getDistance();
+
+                // Se o inimigo estiver dentro da distância mínima de tiro...
+                if (distanciaInimigo < DISTANCIA_MINIMA_TIRO) {
+                    // Atirar no inimigo
+                    setFireBullet(3);
+
+                    // Se não estiver desviando...
+                    if (!desviando) {
+                        // Começar a desviar
+                        desviando = true;
+                        setTurnLeft(ANGULO_DESVIO);
+                        waitFor(Complete);
+                    }
+                } else {
+                    // Se o robô estiver desviando...
+                    if (desviando) {
+                        // Parar de desviar
+                        desviando = false;
+                        setTurnRight(ANGULO_DESVIO);
+                        waitFor(Complete);
+                    }
+
+                    // Se aproximar do inimigo
+                    setAhead(distanciaInimigo - 100);
+                }
+            } else {
+                // Se não houver inimigos, continuar se movendo
+                if (!desviando) {
+                    setAhead(VELOCIDADE_MOVIMENTO);
+                }
+            }
+
+            // Executar ações pendentes
+            execute();
+        }
+    }
+}
